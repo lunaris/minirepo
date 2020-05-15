@@ -1,0 +1,15 @@
+load("@rules_haskell//haskell:defs.bzl", "haskell_binary")
+
+haskell_binary(
+    name = "example-service",
+    srcs = [
+        "src/Main.hs",
+    ],
+    src_strip_prefix = "src",
+    deps = [
+        "@stackage//:base",
+        "@stackage//:zlib",
+    ],
+    # compiler_flags = [
+    # ],
+)
