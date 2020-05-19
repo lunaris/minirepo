@@ -15,6 +15,7 @@ haskell_binary(
     deps = [
         "@stackage//:base",
         "@stackage//:mtl",
+        "@stackage//:postgresql-simple",
         "@stackage//:template-haskell",
         "@stackage//:zlib",
 

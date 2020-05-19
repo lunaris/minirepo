@@ -36,6 +36,7 @@ in
       git
       go
       nix
+      postgresql
     ];
 
     GIT_SSL_CAINFO = "${cacert}/etc/ssl/certs/ca-bundle.crt";
