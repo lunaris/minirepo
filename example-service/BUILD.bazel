@@ -4,6 +4,7 @@ load(
     "haskell_library",
     "haskell_repl",
 )
+load("@io_bazel_rules_docker//cc:image.bzl", "cc_image")
 
 haskell_binary(
     name = "impl",
@@ -23,6 +24,11 @@ haskell_binary(
         "-optl-static",
         "-optl-pthread",
     ],
+)
+
+cc_image(
+    name = "impl-image",
+    binary = ":impl",
 )
 
 haskell_library(

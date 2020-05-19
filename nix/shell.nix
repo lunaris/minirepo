@@ -32,6 +32,7 @@ in
   mkShell {
     buildInputs = [
       bazel
+      docker
       git
       go
       nix

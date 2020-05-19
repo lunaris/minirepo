@@ -18,9 +18,15 @@ setup_python()
 
 load(
     "@io_bazel_rules_docker//repositories:repositories.bzl",
-    rules_docker_repositories = "repositories"
+    container_repositories = "repositories"
 )
-rules_docker_repositories()
+container_repositories()
+
+load(
+    "@io_bazel_rules_docker//cc:image.bzl",
+    container_cc_image_respositories = "repositories",
+)
+container_cc_image_respositories()
 
 load("@//bazel/repository:docker.bzl", "setup_docker")
 setup_docker()
