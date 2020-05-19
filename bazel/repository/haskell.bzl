@@ -2,6 +2,7 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
     "@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl",
     "nixpkgs_cc_configure",
+    "nixpkgs_local_repository",
     "nixpkgs_package",
 )
 load("@rules_haskell//haskell:nixpkgs.bzl", "haskell_register_ghc_nixpkgs")
@@ -13,45 +14,52 @@ def setup_haskell():
     # Import external repositories that `rules_haskell` needs to work properly.
     rules_haskell_dependencies()
 
-    nixpkgs_cc_configure(repository = "@nixpkgs")
+    nixpkgs_local_repository(
+        name = "haskell_nixpkgs",
+        nix_file = "//nix/haskell:default.nix",
+    )
+
+    nixpkgs_cc_configure(
+        repository = "@haskell_nixpkgs",
+    )
 
     haskell_register_ghc_nixpkgs(
-        repository = "@nixpkgs",
+        version = "8.6.5",
+        repository = "@haskell_nixpkgs",
         attribute_path = "haskellPackages.ghc",
-        version = "8.8.3",
         compiler_flags = [
             "-Wall",
         ],
     )
 
     nixpkgs_package(
-        name = "nixpkgs_stack",
-        repository = "@nixpkgs",
-        attribute_path = "stack",
+        name = "haskell_nixpkgs_stack",
+        repository = "@haskell_nixpkgs",
+        attribute_path = "haskellPackages.stack",
     )
 
     nixpkgs_package(
-        name = "nixpkgs_alex",
-        repository = "@nixpkgs",
+        name = "haskell_nixpkgs_alex",
+        repository = "@haskell_nixpkgs",
         attribute_path = "haskellPackages.alex",
     )
 
     nixpkgs_package(
-        name = "nixpkgs_c2hs",
-        repository = "@nixpkgs",
+        name = "haskell_nixpkgs_c2hs",
+        repository = "@haskell_nixpkgs",
         attribute_path = "haskellPackages.c2hs",
     )
 
     nixpkgs_package(
-        name = "nixpkgs_happy",
-        repository = "@nixpkgs",
+        name = "haskell_nixpkgs_happy",
+        repository = "@haskell_nixpkgs",
         attribute_path = "haskellPackages.happy",
     )
 
     nixpkgs_cc_library_package(
-        name = "nixpkgs_zlib",
-        repository = "@nixpkgs",
-        attribute_paths = ["zlib.dev", "zlib.out"],
+        name = "haskell_nixpkgs_zlib",
+        repository = "@haskell_nixpkgs",
+        attribute_paths = ["zlib_both.dev", "zlib_both.out"],
         cc_library = dict(
             name = "c_lib",
             srcs = [":lib"],
@@ -65,7 +73,7 @@ def setup_haskell():
     stack_snapshot(
         name = "stackage",
         snapshot = "lts-14.4",
-        stack = "@nixpkgs_stack//:bin/stack",
+        stack = "@haskell_nixpkgs_stack//:bin/stack",
         packages = [
             # Core libraries
             "array",
@@ -79,18 +87,19 @@ def setup_haskell():
             "mtl",
             "process",
             "text",
+            "template-haskell",
 
             # Hackage dependencies
             "zlib",
         ],
         tools = [
-            "@nixpkgs_alex//:bin/alex",
-            "@nixpkgs_c2hs//:bin/c2hs",
-            "@nixpkgs_happy//:bin/happy",
+            "@haskell_nixpkgs_alex//:bin/alex",
+            "@haskell_nixpkgs_c2hs//:bin/c2hs",
+            "@haskell_nixpkgs_happy//:bin/happy",
         ],
         extra_deps = {
             "zlib": [
-                "@nixpkgs_zlib//:c_lib",
+                "@haskell_nixpkgs_zlib//:c_lib",
             ],
         },
     )

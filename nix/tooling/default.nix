@@ -10,7 +10,11 @@ let
     sha256 = "188ngflznyp9p7x4y0svfgpcyi4lh8fzk5q140pd61plxj3xr3v1";
   };
 
+  staticHaskellNixpkgs = builtins.fetchTarball
+    https://github.com/nh2/static-haskell-nix/archive/749707fc90b781c3e653e67917a7d571fe82ae7b.tar.gz;
+
   overlay = self: super: {
+    staticHaskell = import (staticHaskellNixpkgs + "/survey/default.nix") {};
   };
 
 in

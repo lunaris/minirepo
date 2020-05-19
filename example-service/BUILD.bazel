@@ -1,15 +1,50 @@
-load("@rules_haskell//haskell:defs.bzl", "haskell_binary")
+load(
+    "@rules_haskell//haskell:defs.bzl",
+    "haskell_binary",
+    "haskell_library",
+    "haskell_repl",
+)
 
 haskell_binary(
-    name = "example-service",
+    name = "impl",
     srcs = [
-        "src/Main.hs",
+        "impl/Main.hs",
     ],
-    src_strip_prefix = "src",
+    src_strip_prefix = "impl",
     deps = [
         "@stackage//:base",
+        "@stackage//:mtl",
+        "@stackage//:template-haskell",
         "@stackage//:zlib",
+
+        ":ifc",
     ],
-    # compiler_flags = [
-    # ],
+    compiler_flags = [
+        "-optl-static",
+        "-optl-pthread",
+    ],
+)
+
+haskell_library(
+    name = "ifc",
+    srcs = [
+        "ifc/Example.hs",
+    ],
+    src_strip_prefix = "ifc",
+    deps = [
+        "@stackage//:base",
+        "@stackage//:mtl",
+    ],
+)
+
+haskell_repl(
+    name = "impl-ifc-repl",
+    experimental_from_source = [
+        ":ifc",
+        ":impl",
+    ],
+    deps = [
+        ":ifc",
+        ":impl",
+    ],
 )

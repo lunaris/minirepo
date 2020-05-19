@@ -46,14 +46,14 @@ if [[ "${IN_NIX_SHELL:-false}" != "pure" ]]; then
   # NIXOPTS used in use_nix
   declare -a NIXOPTS=( \
       '--option' 'substituters' \
-          'https://cache.nixos.org' \
+          'https://cache.nixos.org https://static-haskell-nix.cachix.org' \
       '--option' 'trusted-public-keys' \
-          'cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=' \
+          'cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= static-haskell-nix.cachix.org-1:Q17HawmAwaM1/BfIxaEDKAxwTOyRVhPG5Ji9K3+FvUU=' \
   )
 
   # shellcheck source=direnv/modules/use_nix.bash
   import use_nix
-  use nix shell.nix nix/nixpkgs/default.nix
+  use nix shell.nix nix/tooling/default.nix
 
   export MONOREPO="$PWD"
 

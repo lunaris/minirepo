@@ -1,4 +1,4 @@
-{ pkgs ? import ./nixpkgs {} }:
+{ pkgs ? import ./tooling {} }:
 
 with pkgs;
 with darwin.apple_sdk.frameworks;

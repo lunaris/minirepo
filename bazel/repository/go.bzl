@@ -17,7 +17,7 @@ def setup_go():
 
     nixpkgs_package(
         name = "go",
-        repository = "@nixpkgs",
+        repository = "@nixpkgs_tooling",
         nix_file_content = _go_for_rules_go,
     )
 
