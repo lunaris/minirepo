@@ -22,8 +22,8 @@ haskell_binary(
         ":ifc",
     ],
     compiler_flags = [
-        "-optl-static",
-        "-optl-pthread",
+        # "-optl-static",
+        # "-optl-pthread",
     ],
 )
 

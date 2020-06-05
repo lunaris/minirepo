@@ -29,11 +29,18 @@ def workspace_dependencies():
         shallow_since = "1564776078 -0400",
     )
 
+    # http_archive(
+    #     name = "rules_haskell",
+    #     sha256 = "f23deee19fabd8317cd66ac531169e2f332bb9420676de4d1429384ebfd5d74a",
+    #     strip_prefix = "rules_haskell-a9930c7856d251718613cca7a75f83aa911bf725",
+    #     urls = ["https://github.com/tweag/rules_haskell/archive/a9930c7856d251718613cca7a75f83aa911bf725.tar.gz"],
+    # )
+
     http_archive(
         name = "rules_haskell",
-        sha256 = "f23deee19fabd8317cd66ac531169e2f332bb9420676de4d1429384ebfd5d74a",
-        strip_prefix = "rules_haskell-a9930c7856d251718613cca7a75f83aa911bf725",
-        urls = ["https://github.com/tweag/rules_haskell/archive/a9930c7856d251718613cca7a75f83aa911bf725.tar.gz"],
+        sha256 = "b2905b6105131357a807da17b80bba7ebdb869e0586c68c341ece332973d63e1",
+        strip_prefix = "rules_haskell-7687765f2d2283c18ee01a23215fe86b806c6138",
+        urls = ["https://github.com/tweag/rules_haskell/archive/7687765f2d2283c18ee01a23215fe86b806c6138.tar.gz"],
     )
 
     http_archive(
