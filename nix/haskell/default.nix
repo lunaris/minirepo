@@ -11,7 +11,7 @@ let
   };
 
   staticHaskellNixpkgs = builtins.fetchTarball
-    https://github.com/nh2/static-haskell-nix/archive/749707fc90b781c3e653e67917a7d571fe82ae7b.tar.gz;
+    https://github.com/nh2/static-haskell-nix/archive/dbce18f4808d27f6a51ce31585078b49c86bd2b5.tar.gz;
 
   staticHaskellPkgs =
     let
@@ -19,5 +19,30 @@ let
     in
       p.approachPkgs;
 
+  overlay = self: super: {
+    staticHaskell = staticHaskellPkgs.extend (selfSH: superSH: {
+      # A custom derivation that contains both static and dynamic libraries.
+      # Note that setting `static = false` isn't sufficient as the derivation at
+      # https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/libraries/openssl/default.nix
+      # will remove `.a` files in this case. Consequently we build with
+      # `static = false` and then explicitly copy the static libraries _back in_
+      # from the existing derivation (which sets `static = true`).
+      #
+      openssl_both =
+        (superSH.openssl.overrideAttrs (old: {
+          postInstall = ''
+            ${old.postInstall}
+
+            cp ${superSH.openssl.out}/lib/*.a $out/lib
+          '';
+        })).override {
+          static = false;
+        };
+    });
+  };
+
 in
-  args: import baseNixpkgs args
+  args@{ overlays ? [], ... }:
+    import baseNixpkgs (args // {
+      overlays = [overlay] ++ overlays;
+    })

@@ -58,7 +58,7 @@ if [[ "${IN_NIX_SHELL:-false}" != "pure" ]]; then
   export MONOREPO="$PWD"
 
   IFS=: read -r -a NIX_PATH_PARTS <<<"${NIX_PATH:-}"
-  NIX_PATH=$(printf "%s:" "nixpkgs=$MONOREPO/nix/nixpkgs" "monorepo=$MONOREPO" "${NIX_PATH_PARTS[@]/#nixpkgs=/external-nixpkgs=}")
+  NIX_PATH=$(printf "%s:" "nixpkgs=$MONOREPO/nix/tooling" "monorepo=$MONOREPO" "${NIX_PATH_PARTS[@]/#nixpkgs=/external-nixpkgs=}")
   NIX_PATH="${NIX_PATH%:}"
   export NIX_PATH
 

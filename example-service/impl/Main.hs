@@ -23,7 +23,7 @@ main = do
     Just connStr -> do
       putStrLn "Testing PostgreSQL"
       conn <- PG.connectPostgreSQL (fromString connStr)
-      [PG.Only (x :: Int)] <- PG.query_ conn "select 1"
+      [PG.Only (x :: Int)] <- PG.query_ conn "select 1 + 1"
       print x
 
     Nothing ->

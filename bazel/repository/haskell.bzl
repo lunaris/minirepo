@@ -21,12 +21,18 @@ def setup_haskell():
 
     nixpkgs_cc_configure(
         repository = "@haskell_nixpkgs",
+        nix_file_content = """
+          with import <nixpkgs> { config = {}; overlays = []; }; buildEnv {
+            name = "bazel-cc-toolchain";
+            paths = [ staticHaskell.stdenv.cc staticHaskell.binutils ];
+          }
+        """,
     )
 
     haskell_register_ghc_nixpkgs(
-        version = "8.8.3",
+        version = "8.6.5",
         repository = "@haskell_nixpkgs",
-        attribute_path = "haskellPackages.ghc",
+        attribute_path = "staticHaskell.haskell.compiler.ghc865",
         compiler_flags = [
             "-Wall",
         ],
@@ -35,34 +41,54 @@ def setup_haskell():
     nixpkgs_package(
         name = "haskell_nixpkgs_stack",
         repository = "@haskell_nixpkgs",
+
+        # We don't need `stack` to be built statically (it's a build-time
+        # dependency) so we take it from the default `haskellPackages`, which is
+        # more likely to a. work and b. be cached.
         attribute_path = "haskellPackages.stack",
     )
 
     nixpkgs_package(
         name = "haskell_nixpkgs_alex",
         repository = "@haskell_nixpkgs",
+
+        # We don't need `alex` to be built statically (it's a build-time
+        # dependency) so we take it from the default `haskellPackages`, which is
+        # more likely to a. work and b. be cached.
         attribute_path = "haskellPackages.alex",
     )
 
     nixpkgs_package(
         name = "haskell_nixpkgs_c2hs",
         repository = "@haskell_nixpkgs",
+
+        # We don't need `c2hs` to be built statically (it's a build-time
+        # dependency) so we take it from the default `haskellPackages`, which is
+        # more likely to a. work and b. be cached.
         attribute_path = "haskellPackages.c2hs",
     )
 
     nixpkgs_package(
         name = "haskell_nixpkgs_happy",
         repository = "@haskell_nixpkgs",
+
+        # We don't need `happy` to be built statically (it's a build-time
+        # dependency) so we take it from the default `haskellPackages`, which is
+        # more likely to a. work and b. be cached.
         attribute_path = "haskellPackages.happy",
     )
 
     nixpkgs_cc_library_package(
         name = "haskell_nixpkgs_postgresql",
         repository = "@haskell_nixpkgs",
-        attribute_paths = ["postgresql", "postgresql.lib"],
+        attribute_paths = [
+            "staticHaskell.postgresql",
+            "staticHaskell.postgresql.lib",
+        ],
 				libs = [
-					"lib/**/*.so*",
-					"lib/**/*.dylib",
+					"lib/libpq.so*",
+					"lib/libpq.dylib",
+					"lib/libpq.a",
 				],
         cc_library = dict(
             name = "c_lib",
@@ -70,14 +96,77 @@ def setup_haskell():
             hdrs = [":include"],
             strip_include_prefix = "include",
             visibility = ["//visibility:public"],
-            #linkstatic = True,
+            linkstatic = True,
+        ),
+    )
+
+    # Pulling in OpenSSL from Nixpkgs
+    #
+    # There are a couple of considerations when pulling in OpenSSL from Nixpkgs
+    # to make things work:
+    #
+    # * While both `libcrypto` and `libssl` come from `openssl`, we bring them in
+    #   separately. This is because they must be linked in a particular order
+    #   (`libssl` must be linked _before_ `libcrypto`) when static linking on `.a`
+    #   files is being performed (see e.g.
+    #   https://github.com/nutechsoftware/ser2sock/pull/13/files), and having two
+    #   separate Bazel targets allows us to achieve this without excessive hacking
+    #   (see the order these targets are passed as `extra_deps` to libraries that
+    #   need them).
+    #
+    # * We pull in a custom derivation, `openssl_both`, that includes both
+    #   dynamic (`*.so`, etc.) and static (`*.a`) libraries. This is so that
+    #   both building (GHC, static dependencies) and REPLs (GHCi, dynamic
+    #   dependencies without hacking GHCi) work. This is in the vein of the
+    #   `zlib_both` package, which is already provided by `static-haskell-nix`.
+    #
+    nixpkgs_cc_library_package(
+        name = "haskell_nixpkgs_crypto",
+        repository = "@haskell_nixpkgs",
+        attribute_paths = [
+            "staticHaskell.openssl_both.dev",
+            "staticHaskell.openssl_both.out",
+        ],
+        libs = [
+          "lib/libcrypto.*",
+        ],
+        cc_library = dict(
+            name = "c_lib",
+            srcs = [":lib"],
+            hdrs = [":include"],
+            strip_include_prefix = "include",
+            visibility = ["//visibility:public"],
+            linkstatic = True,
+        ),
+    )
+
+    nixpkgs_cc_library_package(
+        name = "haskell_nixpkgs_openssl",
+        repository = "@haskell_nixpkgs",
+        attribute_paths = [
+            "staticHaskell.openssl_both.dev",
+            "staticHaskell.openssl_both.out",
+        ],
+        libs = [
+          "lib/libssl.*",
+        ],
+        cc_library = dict(
+            name = "c_lib",
+            srcs = [":lib"],
+            hdrs = [":include"],
+            strip_include_prefix = "include",
+            visibility = ["//visibility:public"],
+            linkstatic = True,
         ),
     )
 
     nixpkgs_cc_library_package(
         name = "haskell_nixpkgs_zlib",
         repository = "@haskell_nixpkgs",
-        attribute_paths = ["zlib.dev", "zlib.out"],
+        attribute_paths = [
+            "staticHaskell.zlib_both.dev",
+            "staticHaskell.zlib_both.out",
+        ],
         cc_library = dict(
             name = "c_lib",
             srcs = [":lib"],
@@ -90,7 +179,7 @@ def setup_haskell():
 
     stack_snapshot(
         name = "stackage",
-        snapshot = "lts-15.4",
+        snapshot = "lts-14.27",
         stack = "@haskell_nixpkgs_stack//:bin/stack",
         packages = [
             # Core libraries
@@ -119,11 +208,22 @@ def setup_haskell():
         ],
         extra_deps = {
             "postgresql-libpq": [
+                # Note that as per
+                # https://github.com/nh2/static-haskell-nix/issues/57, we need
+                # to link against `openssl` whenever we link against `libpq`.
+                # Moreover, note the order in which we link `libcrypto` and
+                # `libssl` is important -- see "Pulling in OpenSSL from Nixpkgs"
+                # for more information.
+                #
+                # DO NOT REORDER THESE TWO DEPENDENCIES.
+                #
+                "@haskell_nixpkgs_openssl//:c_lib",
+                "@haskell_nixpkgs_crypto//:c_lib",
+
                 "@haskell_nixpkgs_postgresql//:c_lib",
             ],
             "zlib": [
                 "@haskell_nixpkgs_zlib//:c_lib",
-								# "@zlib",
             ],
         },
     )
@@ -147,6 +247,9 @@ def nixpkgs_cc_library_package(
         ])
         kwargs = dict(kwargs, nix_file_content = nix_file_content)
 
+    # If an explicit set of `libs` is given, use those. Otherwise, glob all
+    # dynamic and static libraries (including those we might find on
+    # Darwin/macOS).
     libs = libs or [paths.join("lib", "**/*") + ext for ext in [".so*", ".dylib", ".a"]]
 
     build_file_lines = (
