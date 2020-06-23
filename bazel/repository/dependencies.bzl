@@ -38,9 +38,9 @@ def workspace_dependencies():
 
     http_archive(
         name = "rules_haskell",
-        sha256 = "b2905b6105131357a807da17b80bba7ebdb869e0586c68c341ece332973d63e1",
-        strip_prefix = "rules_haskell-7687765f2d2283c18ee01a23215fe86b806c6138",
-        urls = ["https://github.com/tweag/rules_haskell/archive/7687765f2d2283c18ee01a23215fe86b806c6138.tar.gz"],
+        sha256 = "63d725d0f7e2c4a5c32f3f2d90cff55e740597b581752e83a404bc652db0103c",
+        strip_prefix = "rules_haskell-f8660ecbf4c2208af8e3dbb24a8234121b83af3d",
+        urls = ["https://github.com/tweag/rules_haskell/archive/f8660ecbf4c2208af8e3dbb24a8234121b83af3d.tar.gz"],
     )
 
     http_archive(
@@ -57,4 +57,20 @@ def workspace_dependencies():
         sha256 = "dc97fccceacd4c6be14e800b2a00693d5e8d07f69ee187babfd04a80a9f8e250",
         strip_prefix = "rules_docker-0.14.1",
         urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.14.1/rules_docker-v0.14.1.tar.gz"],
+    )
+
+    http_archive(
+        name = "zlib",
+        build_file_content = """
+cc_library(
+    name = "zlib",
+    srcs = [":z"],
+    hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
+)
+cc_library(name = "z", srcs = glob(["*.c"]), hdrs = glob(["*.h"]))
+        """,
+        sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
+        strip_prefix = "zlib-1.2.11",
+        urls = ["http://zlib.net/zlib-1.2.11.tar.gz"],
     )

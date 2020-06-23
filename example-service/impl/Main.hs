@@ -21,6 +21,7 @@ main = do
   maybeConnStr <- Env.lookupEnv "PG_CONNECTION_STRING"
   case maybeConnStr of
     Just connStr -> do
+      putStrLn "Testing PostgreSQL"
       conn <- PG.connectPostgreSQL (fromString connStr)
       [PG.Only (x :: Int)] <- PG.query_ conn "select 1"
       print x

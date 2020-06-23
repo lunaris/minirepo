@@ -60,13 +60,17 @@ def setup_haskell():
         name = "haskell_nixpkgs_postgresql",
         repository = "@haskell_nixpkgs",
         attribute_paths = ["postgresql", "postgresql.lib"],
+				libs = [
+					"lib/**/*.so*",
+					"lib/**/*.dylib",
+				],
         cc_library = dict(
             name = "c_lib",
             srcs = [":lib"],
             hdrs = [":include"],
             strip_include_prefix = "include",
             visibility = ["//visibility:public"],
-            linkstatic = True,
+            #linkstatic = True,
         ),
     )
 
@@ -82,35 +86,6 @@ def setup_haskell():
             visibility = ["//visibility:public"],
             linkstatic = True,
         ),
-    )
-
-    nixpkgs_package(
-        name = "zlib_nixpkgs",
-        repository = "@haskell_nixpkgs",
-        attribute_path = "zlib",
-    )
-
-    nixpkgs_package(
-        name = "zlib_dev_nixpkgs",
-        repository = "@haskell_nixpkgs",
-        attribute_path = "zlib.dev",
-        build_file_content = """
-load("@rules_cc//cc:defs.bzl", "cc_library")
-
-filegroup(
-    name = "include",
-    srcs = glob(["include/*.h"]),
-    visibility = ["//visibility:public"],
-)
-
-cc_library(
-    name = "zlib",
-    srcs = ["@zlib_nixpkgs//:lib"],
-    hdrs = [":include"],
-    strip_include_prefix = "include",
-    visibility = ["//visibility:public"],
-)
-        """,
     )
 
     stack_snapshot(
@@ -148,6 +123,7 @@ cc_library(
             ],
             "zlib": [
                 "@haskell_nixpkgs_zlib//:c_lib",
+								# "@zlib",
             ],
         },
     )
@@ -161,7 +137,7 @@ def nixpkgs_cc_library_package(
     repository,
     cc_library,
     attribute_paths = None,
-    only_libs = None,
+    libs = None,
     **kwargs):
 
     if attribute_paths:
@@ -171,8 +147,7 @@ def nixpkgs_cc_library_package(
         ])
         kwargs = dict(kwargs, nix_file_content = nix_file_content)
 
-    only_libs = only_libs or ["**/*"]
-    libs = [paths.join("lib", lib) + ext for lib in only_libs for ext in [".so*", ".dylib", ".a"]]
+    libs = libs or [paths.join("lib", "**/*") + ext for ext in [".so*", ".dylib", ".a"]]
 
     build_file_lines = (
         [
