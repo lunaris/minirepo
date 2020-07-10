@@ -216,7 +216,7 @@ INFO: Build completed successfully, 3 total actions
 ```
 
 * Booting up GHCIDE directly for local development (check out `hie.yaml` and
-  `.hie-bios`
+  `.hie-bios`)
 
 ```bash
 $ ghcide
