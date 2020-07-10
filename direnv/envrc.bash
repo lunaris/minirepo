@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# This file is symlinked as `.envrc` in the repository root, which will trigger
+# `direnv` to activate if installed and allowed. `direnv` is a tool for changing
+# the shell environment when entering or leaving a directory and in this
+# repository is used for implicitly entering a Nix shell, which should minimise
+# the effort required to get up and running when developing in this repository
+# (and equally help ensure that everyone working on a repository is using the
+# same tools).
+
 set -euo pipefail
 
 # We can't just early-exit here as direnv wants to run some stuff after this

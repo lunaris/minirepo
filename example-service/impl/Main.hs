@@ -12,12 +12,29 @@ import qualified Example as Example
 import qualified Language.Haskell.TH as TH
 import qualified System.Environment as Env
 
+-- |Our application's entry point.
 main :: IO ()
 main = do
+  --  Test some code that comes from an in-repository dependency built with
+  --  Bazel.
   print (runReader Example.doubleEnvironment 21)
-  putStrLn $(TH.stringE $ show Z.defaultCompression)
+
+  --  Test Template Haskell that loads code that comes from an in-repository
+  --  dependency built with Bazel.
+  putStrLn $(TH.stringE $ Example.someString)
+
+  --  Test some code that comes from a Hackage dependency built with Cabal
+  --  (through Bazel). In particular, we target a library that has C
+  --  dependencies (`zlib` in this case).
   print Z.defaultCompression
 
+  --  Test Template Haskell that loads code that comes from a Hackage dependency
+  --  built with Cabal (through Bazel).
+  putStrLn $(TH.stringE $ show Z.defaultCompression)
+
+  --  A slightly chunkier test of some code that comes from a Hackage dependency
+  --  built with Cabal (through Bazel) and that more heavily exercises C code
+  --  (here, `libpq`, which is used indirectly by `postgresql-simple`).
   maybeConnStr <- Env.lookupEnv "PG_CONNECTION_STRING"
   case maybeConnStr of
     Just connStr -> do

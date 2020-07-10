@@ -1,11 +1,29 @@
 load(
     "@rules_haskell//haskell:defs.bzl",
     "haskell_binary",
+    "haskell_doc",
     "haskell_library",
     "haskell_repl",
 )
 load("@io_bazel_rules_docker//cc:image.bzl", "cc_image")
 
+# Builds a fully-statically-linked Haskell binary using Bazel and rules_haskell.
+# Note the `-optl-static` and `-optl-pthread` compiler flags -- these are
+# important. Without them you'll get a "mostly-statically-linked" binary, in
+# which all the Haskell bits are statically linked but where C libraries may be
+# dynamically linked. Consequently these binaries may not work if you are only
+# pulling in static C libraries. Ways you might have your cake and eat it:
+#
+# * Pull in both dynamic and static versions of C dependencies. Nix makes this
+#   fairly straightforward in many cases through its (for instance)
+#   `enableShared` and `dontDisableStatic` flags on many derivations.
+#
+# * Consistently use a wrapper, e.g. `your_company_or_repo_binary`, that always
+#   adds these two flags (and any others, such as `-Wall`, `-Werror`, etc. that
+#   you might want to apply to all binaries). In general building a
+#   domain-specific language for your repository's builds is what Bazel is good
+#   for, so this may make sense in other cases aside from
+#   fully-statically-linked binaries too.
 haskell_binary(
     name = "impl",
     srcs = [
@@ -27,11 +45,18 @@ haskell_binary(
     ],
 )
 
+# Builds a Docker image that packages and runs the fully-statically-linked
+# binary above. Since the binary is completely statically linked, we can use the
+# raw `cc_image` rule and its Distroless image and everything runs just fine,
+# which is great for light(er)weight Docker images.
 cc_image(
     name = "impl-image",
     binary = ":impl",
 )
 
+# Builds a Haskell library that may be depended on by other targets. Note that
+# only a static version (`.a`) will be generated since our toolchain
+# `is_static`.
 haskell_library(
     name = "ifc",
     srcs = [
@@ -44,6 +69,14 @@ haskell_library(
     ],
 )
 
+# A REPL target that allows running GHCi against both our library and binary
+# code. Note that you already get `@repl` targets on `haskell_library` and
+# `haskell_binary` (e.g. here you could run `bazel run
+# //example-service/impl@repl`) but the explicit `haskell_repl` rule can be
+# useful for targeting multiple things or, in this case, testing that the whole
+# shebang works nicely together. Moreover, this is the target we use to get
+# `ghcide` up and running against the whole codebase (which, granted, is tiny
+# here). See `.hie-bios` in the repository root for more information on this.
 haskell_repl(
     name = "impl-ifc-repl",
     experimental_from_source = [
@@ -54,4 +87,17 @@ haskell_repl(
         ":ifc",
         ":impl",
     ],
+)
+
+# A documentation target that generates Haddock documentation for the code in
+# this repository. You shouldn't have to do anything special here with regards
+# to static linking -- Haddock is an external tool separate to the compilation
+# process and is only interested in the source code.
+haskell_doc(
+    name = "impl-ifc-docs",
+    deps = [
+        ":ifc",
+        ":impl",
+    ],
+    index_transitive_deps = True,
 )

@@ -7,10 +7,10 @@ load(
 load("@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl", "nixpkgs_package")
 
 # By default, rules_go will download a Go SDK for your platform and use that.
-# The problem is that this sdk is not statically linked and doesn't work on
+# The problem is that this SDK is not statically linked and doesn't work on
 # NixOS (see https://github.com/bazelbuild/rules_go/issues/1376).
 #
-# So we fix this by pinning the go toolchain to what nixpkgs provides.
+# So we fix this by pinning the Go toolchain to what Nixpkgs provides.
 
 def setup_go():
     go_rules_dependencies()

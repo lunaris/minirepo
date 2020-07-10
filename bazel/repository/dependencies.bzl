@@ -29,18 +29,15 @@ def workspace_dependencies():
         shallow_since = "1564776078 -0400",
     )
 
-    # http_archive(
-    #     name = "rules_haskell",
-    #     sha256 = "f23deee19fabd8317cd66ac531169e2f332bb9420676de4d1429384ebfd5d74a",
-    #     strip_prefix = "rules_haskell-a9930c7856d251718613cca7a75f83aa911bf725",
-    #     urls = ["https://github.com/tweag/rules_haskell/archive/a9930c7856d251718613cca7a75f83aa911bf725.tar.gz"],
-    # )
-
+    # At present, fully-static support isn't in upstream `rules_haskell`, so this
+    # repository uses a pinned commit on a fork which does support this use
+    # case. Hopefully this will be merged in time -- expect this repository to
+    # update if and when it is.
     http_archive(
         name = "rules_haskell",
-        sha256 = "63d725d0f7e2c4a5c32f3f2d90cff55e740597b581752e83a404bc652db0103c",
-        strip_prefix = "rules_haskell-f8660ecbf4c2208af8e3dbb24a8234121b83af3d",
-        urls = ["https://github.com/tweag/rules_haskell/archive/f8660ecbf4c2208af8e3dbb24a8234121b83af3d.tar.gz"],
+        sha256 = "ecb02be93c39229f1f3e340cf9088846fa020cb18dc95fc52a7c1bee2d3f8a31",
+        strip_prefix = "rules_haskell-28a27f7de3273f67586f611b69be50664ab17683",
+        urls = ["https://github.com/lunaris/rules_haskell/archive/28a27f7de3273f67586f611b69be50664ab17683.tar.gz"],
     )
 
     http_archive(

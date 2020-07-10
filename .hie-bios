@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+bazel build //example-service:impl-ifc-repl --output_groups=hie_bios
+cat bazel-bin/example-service/impl-ifc-repl@hie-bios >"$HIE_BIOS_OUTPUT"
