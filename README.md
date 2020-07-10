@@ -68,8 +68,7 @@ DefaultCompression
 DefaultCompression
 No connection string given, no PostgreSQL testing performed
 
-bazel-haskell-playground on  master [$!?]
-✦ ➜ ldd bazel-bin/example-service/impl
+$ ldd bazel-bin/example-service/impl
 $       not a dynamic executable
 ```
 
