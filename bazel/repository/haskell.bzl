@@ -47,12 +47,13 @@ def setup_haskell():
         attribute_path = "staticHaskell.ghc",
 
         # We are building fully-statically-linked binaries, so our runtime is
-        # static and this is a static toolchain. This must be set to `True` so
-        # that `rules_haskell` will take the steps necessary to make static
-        # compilation work. If this is omitted or set to false, `-optl-static`
-        # and company in a `haskell_binary` rule will _not_ be sufficient to get
-        # everything working.
-        is_static = True,
+        # static and this is a static toolchain. Thus both `static_runtime` and
+        # `fully_static_link` must be set to `True` so that `rules_haskell` will
+        # take the steps necessary to make static compilation work. If this is
+        # omitted or set to false, `-optl-static` in a `haskell_binary` rule
+        # will _not_ be sufficient to get everything working.
+        static_runtime = True,
+        fully_static_link = True,
 
         # Global compiler flags (here as an example).
         compiler_flags = [
@@ -97,6 +98,7 @@ def setup_haskell():
 
             # Hackage dependencies
             "hashable",
+            "hslua",
             "postgresql-simple",
             "zlib",
         ],

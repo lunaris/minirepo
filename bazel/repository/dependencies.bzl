@@ -29,15 +29,11 @@ def workspace_dependencies():
         shallow_since = "1564776078 -0400",
     )
 
-    # At present, fully-static support isn't in upstream `rules_haskell`, so this
-    # repository uses a pinned commit on a fork which does support this use
-    # case. Hopefully this will be merged in time -- expect this repository to
-    # update if and when it is.
     http_archive(
         name = "rules_haskell",
-        sha256 = "ecb02be93c39229f1f3e340cf9088846fa020cb18dc95fc52a7c1bee2d3f8a31",
-        strip_prefix = "rules_haskell-28a27f7de3273f67586f611b69be50664ab17683",
-        urls = ["https://github.com/lunaris/rules_haskell/archive/28a27f7de3273f67586f611b69be50664ab17683.tar.gz"],
+        sha256 = "dc21a9b30734ab0fce58c2107656aac004a92c3caef913e54082335abc7cf468",
+        strip_prefix = "rules_haskell-a5a550874d5be8852755bd9bfe3f6d9a8d3ba793",
+        urls = ["https://github.com/tweag/rules_haskell/archive/a5a550874d5be8852755bd9bfe3f6d9a8d3ba793.tar.gz"],
     )
 
     http_archive(

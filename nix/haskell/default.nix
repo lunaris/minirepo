@@ -85,19 +85,6 @@ let
       #   through `GhcLibHcOpts`) and when building the GHC runtime system (RTS;
       #   through `GhcRtsHcOpts`). See the `preConfigure` phase for more
       #   information.
-      #
-      # * (hs-extra-libs) GHCi and Template Haskell will only statically-link
-      #   libraries if they are specified in the `extra-libraries` property of a
-      #   package (libraries in `hs-libraries` will always be linked
-      #   dynamically). This functionality is designed primarily for C libraries
-      #   but seems to work just fine if Haskell libraries are provided as
-      #   `extra-libraries` too. `rules_haskell` builds packages using
-      #   `extra-libraries` when a static toolchain is in use, but this doesn't
-      #   take care of the packages that come bundled with GHC (e.g. `base`,
-      #   `containers`, etc.). Thus as part of the GHC derivation, we patch the
-      #   configuration files of the built-in packages to use `extra-libraries`
-      #   instead of `hs-libraries`. See the `postInstall` phase for more
-      #   information.
       ghc = (superSH.ghc.override {
         # See (pic-dynamic)
         enableRelocatedStaticLibs = true;
@@ -108,21 +95,6 @@ let
           ${oldAttrs.preConfigure or ""}
           echo "GhcLibHcOpts += -fPIC -fexternal-dynamic-refs" >> mk/build.mk
           echo "GhcRtsHcOpts += -fPIC -fexternal-dynamic-refs" >> mk/build.mk
-        '';
-        postInstall = ''
-          ${oldAttrs.postInstall or ""}
-          # See (hs-extra-libs)
-          local packageConfDir="$out/lib/${superSH.ghc.name}/package.conf.d";
-          for f in $packageConfDir/*.conf; do
-            filename="$(basename $f)"
-              if [ "$filename" != "rts.conf" ]; then
-                cp $f $f-tmp
-                rm $f
-                sed -e "s/hs-libraries/extra-libraries/g" $f-tmp > $f
-                rm $f-tmp
-              fi
-          done
-          $out/bin/ghc-pkg recache
         '';
       });
 

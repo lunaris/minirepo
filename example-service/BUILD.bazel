@@ -8,11 +8,11 @@ load(
 load("@io_bazel_rules_docker//cc:image.bzl", "cc_image")
 
 # Builds a fully-statically-linked Haskell binary using Bazel and rules_haskell.
-# Note the `-optl-static` and `-optl-pthread` compiler flags -- these are
-# important. Without them you'll get a "mostly-statically-linked" binary, in
-# which all the Haskell bits are statically linked but where C libraries may be
-# dynamically linked. Consequently these binaries may not work if you are only
-# pulling in static C libraries. Ways you might have your cake and eat it:
+# Note the `-optl-static` compiler flag -- this is important. Without it you'll
+# get a "mostly-statically-linked" binary, in which all the Haskell bits are
+# statically linked but where C libraries may be dynamically linked.
+# Consequently these binaries may not work if you are only pulling in static C
+# libraries. Ways you might have your cake and eat it:
 #
 # * Pull in both dynamic and static versions of C dependencies. Nix makes this
 #   fairly straightforward in many cases through its (for instance)
@@ -41,7 +41,6 @@ haskell_binary(
     ],
     compiler_flags = [
         "-optl-static",
-        "-optl-pthread",
     ],
 )
 
