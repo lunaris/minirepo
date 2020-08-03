@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# This script wraps the ghcide binary provided by Bazel (through the
+# `stack_snapshot` defined in `setup_ghcide`) so that users/programs can call
+# `ghcide` simply and have it "just work". Since the `direnv` adds
+# `$MONOREPO/bin` to the path, running `ghcide` anywhere in the repository will
+# call this script, which will build and run ghcide on demand. Note that since
+# we are using `bazel run`, the working directory will by default be the Bazel
+# repository's execroot. This isn't generally what you want, so we explicitly
+# set the working directory using `ghcide`'s `--cwd` option. If this for any
+# reason causes problems, you can split this command into two pieces -- building
+# using Bazel and then running the resulting binary manually (which won't set
+# the working directory to the Bazel execroot):
+#
+# bazel build @ghcide-exe//ghcide
+# bazel-bin/external/ghcide/ghcide-0.2.0/_install/bin/ghcide "$@"
+#
+
+set -euo pipefail
+bazel run @ghcide-exe//ghcide -- --cwd $MONOREPO "$@"

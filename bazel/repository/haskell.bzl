@@ -147,6 +147,9 @@ def setup_haskell():
         },
     )
 
+    # Set up ghcide for developer experience.
+    setup_ghcide()
+
     # We shouldn't need this but otherwise using `bazel query` may fail.
     # See https://github.com/tweag/rules_haskell/issues/1078
     rules_haskell_worker_dependencies()
@@ -346,4 +349,47 @@ def nixpkgs_cc_library_package(
         repository = repository,
         build_file_content = "\n".join(build_file_lines),
         **kwargs
+    )
+
+def setup_ghcide():
+    # To ensure that we get a version of ghcide compatible with our compiler, we
+    # build ourselves a pinned copy. To do this we define a separate
+    # `stack_snapshot` whose only job is to build ghcide. We pin this using a
+    # local snapshot derived from the `stack.yaml` found in the pinned version
+    # of ghcide's GitHub repository (see `ghcide-stack.yaml` for more
+    # information).
+    stack_snapshot(
+        name = "ghcide",
+        local_snapshot = "//bazel/repository:ghcide-stack.yaml",
+
+        # We only want the ghcide package from this snapshot.
+        packages = [
+            "ghcide",
+        ],
+
+        # By default, `stack_snapshot` is geared towards building library
+        # targets for Cabal packages in a snapshot. In this case we want an
+        # executable target, namely that of the `ghcide` package. The
+        # `components` attribute lets us override the targets to be built on a
+        # per-package basis, so we use it here to ensure we get the ghcide
+        # executable target. This will then be made available under
+        # `@ghcide-exe//ghcide`.
+        components = {
+            "ghcide": [
+                "lib",
+                "exe",
+            ],
+        },
+
+        # ghcide's transitive dependency set depends on zlib, so we need to wire
+        # that up to our C dependencies as in the main snapshot.
+        extra_deps = {
+            "zlib": [
+                "@haskell_nixpkgs_zlib//:c_lib",
+            ],
+        },
+
+        # There's no need to build Haddocks for this snapshot, so we disable
+        # them to speed up builds.
+        haddock = False,
     )

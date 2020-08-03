@@ -55,7 +55,7 @@ in
       python3
 
       # Language-specific tooling (separate pins)
-      haskellTooling.staticHaskell.ghcide
+      haskellTooling.staticHaskell.ghc
     ];
 
     # SSL certificates hygiene so that commands like `git` and `nix` work inside

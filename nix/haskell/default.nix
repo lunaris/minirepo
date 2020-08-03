@@ -42,22 +42,11 @@ let
     import (staticHaskellNixpkgs + "/survey/default.nix") {}
   ).approachPkgs;
 
-  # `ghcide-nix` is a cachix repository that builds and caches versions of
-  # GHCIDE by compiler version. We don't want to have to compile GHCIDE by
-  # source, so we pin that here too to get those lovely cache hits.
-  ghcideNixpkgs = builtins.fetchTarball
-    https://github.com/cachix/ghcide-nix/archive/27d15fc49c1f4510adb82540439da362328cdef8.tar.gz;
-
-  ghcidePkgs = import ghcideNixpkgs {};
-
   # With all the pins and imports done, it's time to build our overlay, in which
   # we are interested in:
   #
   # * Providing a GHC that is capable of building fully-statically-linked
   #   binaries.
-  #
-  # * Providing a version of GHCIDE that is compatible with the aforementioned
-  #   GHC and capable of running on our code.
   #
   # * Providing any system-level/C libraries and packages that we'll need that
   #   aren't already in the `static-haskell-nix` package set (see below for
@@ -97,10 +86,6 @@ let
           echo "GhcRtsHcOpts += -fPIC -fexternal-dynamic-refs" >> mk/build.mk
         '';
       });
-
-      # GHCIDE is straightforward enough -- we just pull it from our pinned
-      # ghcide-nix repository.
-      ghcide = ghcidePkgs.ghcide-ghc865;
 
       # A custom derivation that contains both static and dynamic libraries.
       # Note that setting `static = false` isn't sufficient as the derivation at

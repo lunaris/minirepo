@@ -1,0 +1,30 @@
+# This file pins a Stackage snapshot whose only purpose is to build a version of
+# ghcide suitable for the GHC version used in this repository. At present the
+# GHC version used in this repository is 8.6.5. This file thus takes its
+# contents from the `stack.yaml` available in the ghcide GitHub repository. If
+# e.g. you wish to use GHC 8.8.X, then you should take the contents of the
+# `stack88.yaml` file and tune appropriately.
+resolver: nightly-2019-09-21
+# PATCH: In the ghcide `stack.yaml` file, these packages were under
+# `extra-deps`. Due to how we use snapshots with Bazel, need to move these under
+# `packages` here.
+packages:
+- haskell-lsp-0.22.0.0
+- haskell-lsp-types-0.22.0.0
+- lsp-test-0.11.0.2
+- hie-bios-0.6.1
+- fuzzy-0.1.0.0
+- regex-pcre-builtin-0.95.1.1.8.43
+- regex-base-0.94.0.0
+- regex-tdfa-1.3.1.0
+- shake-0.18.5
+- parser-combinators-1.2.1
+- haddock-library-1.8.0
+- tasty-rerun-1.1.17
+- ghc-check-0.5.0.1
+- extra-1.7.2
+  # ADDITION: We pin a version of ghcide that we want to use, directly from
+  # GitHub.
+- github: digital-asset/ghcide
+  commit: "765967d19be4ca64abc999173029a6bfe6aec113"
+  sha256: "f8e464885405f54a6c2d8486e3cd9d47b60ae5daa4abf77c892a51adfaa76153"
